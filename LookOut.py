@@ -1,6 +1,6 @@
 from sklearn.ensemble import IsolationForest
 import copy
-
+import numpy as np
 
 class LookOut():
 
@@ -93,7 +93,6 @@ class LookOut():
           best_set = copy.copy(new_set_of_plots)
 
       set_of_plots = copy.copy(best_set)
-
     ## Detect which outlier should belong to which plot
     o_p_ids = np.argmax(self.s_matrix[0:self.num_outliers,tuple(set_of_plots)], axis = 1)
     best_feat_comb = [self.feat_pair_list[i] for i in set_of_plots]
@@ -103,21 +102,39 @@ class LookOut():
     for idx,(f1, f2) in enumerate(best_feat_comb):
       
       curr_data = self.X[:, (f1,f2)]
-      ax[idx].scatter(curr_data[:,0], curr_data[:,1])
+      if len(best_feat_comb) > 1:
+          ax[idx].scatter(curr_data[:,0], curr_data[:,1])
+      else:
+          ax.scatter(curr_data[:,0], curr_data[:,1])
       curr_outlier_ind = np.where(o_p_ids==idx)[0]
       curr_outlier_ind = self.outlier_ind[curr_outlier_ind]
       curr_outliers = curr_data[self.sorted_ind[curr_outlier_ind],:]
-      ax[idx].scatter(curr_outliers[:,0], curr_outliers[:,1])
+      if len(best_feat_comb) > 1:
+          ax[idx].scatter(curr_outliers[:,0], curr_outliers[:,1])
+      else:
+          ax.scatter(curr_outliers[:,0], curr_outliers[:,1])
       
       if self.axis_names is None:
-        ax[idx].set_xlabel('Feature {}'.format(f1))
-        ax[idx].set_ylabel('Feature {}'.format(f2))
+        if len(best_feat_comb) > 1:
+            ax[idx].set_xlabel('Feature {}'.format(f1))
+            ax[idx].set_ylabel('Feature {}'.format(f2))
+        else:
+            ax.set_xlabel('Feature {}'.format(f1))
+            ax.set_ylabel('Feature {}'.format(f2))
       else:
-        ax[idx].set_xlabel(self.axis_names[f1])
-        ax[idx].set_ylabel(self.axis_names[f2])
-
+        #print(f1, f2)
+        #print(self.axis_names)
+        #print(self.axis_names[f1], self.axis_names[f2])
+        if len(best_feat_comb) > 1:
+            ax[idx].set_xlabel(self.axis_names[f1])
+            ax[idx].set_ylabel(self.axis_names[f2])
+        else:
+            ax.set_xlabel(self.axis_names[f1])
+            ax.set_ylabel(self.axis_names[f2])
       ## Add the index of the point to the plot
       for pt_id in self.sorted_ind[curr_outlier_ind]:
-        ax[idx].annotate(str(pt_id), (curr_data[pt_id,0], curr_data[pt_id,1]))
+        if len(best_feat_comb) > 1:
+            ax[idx].annotate(str(pt_id), (curr_data[pt_id,0], curr_data[pt_id,1]))
+        else:
+            ax.annotate(str(pt_id), (curr_data[pt_id,0], curr_data[pt_id,1]))
     
-
